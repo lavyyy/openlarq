@@ -1,0 +1,33 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--color-card: hsl(0 0% 100%);
+	--color-card-foreground: hsl(222.2 84% 4.9%);
+	--color-water-light: #d3e4fd;
+	--color-water-medium: #33c3f0;
+	--color-water-dark: #1eaedb;
+	--color-navy-blue: #0a3258;
+}
+
+/* Dark mode theme variables */
+:root[class~='dark'] {
+	--color-card: hsl(222.2 84% 4.9%);
+	--color-card-foreground: hsl(210 40% 98%);
+	--color-water-light: #1e3a8a;
+	--color-water-medium: #3b82f6;
+	--color-water-dark: #1d4ed8;
+	--color-navy-blue: #60a5fa;
+}
+
+.border {
+	border-style: solid;
+	border-width: 1px;
+	border-color: hsl(214.3 31.8% 91.4%);
+}
+
+/* Dark mode border */
+:root[class~='dark'] .border {
+	border-color: hsl(217.2 32.6% 17.5%);
+}
