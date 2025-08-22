@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"slices"
 
-	"barking.dev/larq-api/internal/firebase"
+	"barking.dev/openlarq/internal/firebase"
 )
 
 type LiquidIntakeEntry struct {
@@ -38,7 +38,7 @@ func GetLiquidIntake(client *firebase.FirebaseClient) http.HandlerFunc {
 
 		params := firebase.NewQueryParams(paramMap)
 
-		// Use the new user-specific method
+		// use the new user-specific method
 		res, err := client.GetUserLiquidIntake(params)
 		if err != nil {
 			log.Printf("Error getting liquid intake: %v", err)
@@ -46,11 +46,11 @@ func GetLiquidIntake(client *firebase.FirebaseClient) http.HandlerFunc {
 			return
 		}
 
-		// Format the response
+		// format the response
 		var formattedResponse LiquidIntakeResponse
 		formattedResponse.Entries = make([]LiquidIntakeEntry, 0)
 
-		// Extract data from the response
+		// extract data from the response
 		for _, key := range slices.Sorted(maps.Keys(res.Data.(map[string]interface{}))) {
 			v := res.Data.(map[string]interface{})[key]
 

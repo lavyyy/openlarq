@@ -3,12 +3,13 @@ package larq
 import (
 	"log"
 	"net/http"
+	"os"
 
-	"barking.dev/larq-api/internal/auth"
-	"barking.dev/larq-api/internal/firebase"
-	"barking.dev/larq-api/internal/goals"
-	"barking.dev/larq-api/internal/health"
-	"barking.dev/larq-api/internal/intake"
+	"barking.dev/openlarq/internal/auth"
+	"barking.dev/openlarq/internal/firebase"
+	"barking.dev/openlarq/internal/goals"
+	"barking.dev/openlarq/internal/health"
+	"barking.dev/openlarq/internal/intake"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -46,7 +47,11 @@ func (a *App) registerApiRoutes(r *mux.Router) {
 }
 
 func (a *App) startServer(r *mux.Router) {
-	addr := ":8080"
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	addr := ":" + port
 
 	log.Printf("API listening on %s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, r))
@@ -60,7 +65,7 @@ func (a *App) authenticate() error {
 
 	config := firebase.LoadConfig()
 
-	// Create a new Firebase client instance
+	// create a new Firebase client instance
 	fb, err := firebase.NewFirebaseClient(config.ProjectID, config.DatabaseURL)
 	if err != nil {
 		log.Fatal("Failed to create Firebase client:", err)
@@ -68,7 +73,7 @@ func (a *App) authenticate() error {
 
 	a.fb = fb
 
-	// Authenticate the user
+	// authenticate the user
 	if err := a.fb.AuthenticateUser(idToken); err != nil {
 		log.Fatal("Failed to authenticate user:", err)
 	}

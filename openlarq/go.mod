@@ -1,4 +1,4 @@
-module barking.dev/larq-api
+module barking.dev/openlarq
 
 go 1.23.6
 

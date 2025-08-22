@@ -44,7 +44,7 @@ func NewFirebaseClient(projectID, databaseURL string) (*FirebaseClient, error) {
 		stopChan:      make(chan struct{}),
 	}
 
-	// Connect immediately
+	// connect immediately
 	if err := client.Connect(); err != nil {
 		return nil, err
 	}
@@ -236,7 +236,7 @@ func (c *FirebaseClient) handleMessage(data map[string]interface{}) {
 	}
 
 	if d, ok := data["d"].(map[string]interface{}); ok {
-		// Check for expired token error
+		// check for expired token error
 		if b, ok := d["b"].(map[string]interface{}); ok {
 			if s, ok := b["s"].(string); ok && s == "expired_token" {
 				log.Printf("Detected expired token, attempting to reconnect...")
@@ -280,12 +280,12 @@ func (c *FirebaseClient) handleMessage(data map[string]interface{}) {
 }
 
 func (c *FirebaseClient) reconnect() error {
-	// Close existing connection if it exists
+	// close existing connection if it exists
 	if c.conn != nil {
 		c.conn.Close()
 	}
 
-	// Attempt to establish new connection
+	// attempt to establish new connection
 	u := url.URL{
 		Scheme:   "wss",
 		Host:     c.host,
@@ -299,7 +299,7 @@ func (c *FirebaseClient) reconnect() error {
 	}
 	c.conn = conn
 
-	// Re-authenticate
+	// re-authenticate
 	authRes, err := c.sendRequest("auth", QueryBody{
 		Cred: &c.idToken,
 	})
@@ -307,7 +307,7 @@ func (c *FirebaseClient) reconnect() error {
 		return fmt.Errorf("failed to re-authenticate: %v", err)
 	}
 
-	// Update user ID from auth response
+	// update user ID from auth response
 	if data, ok := authRes.Data.(map[string]interface{}); ok {
 		if auth, ok := data["auth"].(map[string]interface{}); ok {
 			if userID, ok := auth["user_id"].(string); ok {

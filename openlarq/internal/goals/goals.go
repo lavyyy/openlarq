@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"slices"
 
-	"barking.dev/larq-api/internal/firebase"
+	"barking.dev/openlarq/internal/firebase"
 )
 
 type HydrationGoalEntry struct {
@@ -41,11 +41,11 @@ func GetHydrationGoals(client *firebase.FirebaseClient) http.HandlerFunc {
 			return
 		}
 
-		// Format the response
+		// format the response
 		var formattedResponse HydrationGoalResponse
 		formattedResponse.Entries = make([]HydrationGoalEntry, 0)
 
-		// Iterate over each entry in the data, ensuring order is kept
+		// iterate over each entry in the data, ensuring order is kept
 		for _, key := range slices.Sorted(maps.Keys(res.Data.(map[string]interface{}))) {
 			v := res.Data.(map[string]interface{})[key]
 			if entryMap, ok := v.(map[string]interface{}); ok {

@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"barking.dev/larq-api/internal/larq"
+	"barking.dev/openlarq/internal/larq"
 )
 
 func main() {

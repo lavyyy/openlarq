@@ -53,7 +53,6 @@ func (c *FirebaseClient) Query(path string, queryParams QueryParams) (QueryBody,
 		},
 	}
 
-	// Log the query message
 	jsonData, _ := json.MarshalIndent(msg, "", "  ")
 	log.Printf("Sending query message:\n%s", string(jsonData))
 
