@@ -369,3 +369,7 @@ func (c *FirebaseClient) Close() {
 func (c *FirebaseClient) UserId() string {
 	return c.userId
 }
+
+func (c *FirebaseClient) IdToken() string {
+	return c.idToken
+}

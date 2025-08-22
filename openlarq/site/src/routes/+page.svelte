@@ -10,6 +10,7 @@
 
 	const liquidIntake = data.liquidIntake;
 	const hydrationGoal = data.hydrationGoal;
+	const userInfo = data.userInfo;
 
 	const intakeEntries = liquidIntake.entries;
 
@@ -91,6 +92,12 @@
 <div class="min-h-screen bg-gray-50 transition-colors dark:!bg-gray-900">
 	<div class="mx-auto max-w-7xl px-6 py-8">
 		<header class="mb-8 flex items-center justify-between">
+			<div class="flex items-center space-x-4">
+				<h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+					<span class="text-blue-600 dark:text-blue-400">OpenLARQ</span> - {userInfo.displayName}'s
+					hydration stats
+				</h1>
+			</div>
 			<div class="flex">
 				<ThemeToggle />
 			</div>

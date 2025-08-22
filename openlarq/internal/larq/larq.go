@@ -10,6 +10,7 @@ import (
 	"barking.dev/openlarq/internal/goals"
 	"barking.dev/openlarq/internal/health"
 	"barking.dev/openlarq/internal/intake"
+	"barking.dev/openlarq/internal/user"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -41,7 +42,7 @@ func (a *App) StartApp() error {
 
 func (a *App) registerApiRoutes(r *mux.Router) {
 	r.HandleFunc("/health", health.Health).Methods("GET")
-
+	r.HandleFunc("/user-info", user.GetUserInfo(a.fb)).Methods("GET")
 	r.HandleFunc("/liquid-intake", intake.GetLiquidIntake(a.fb)).Methods("GET")
 	r.HandleFunc("/hydration-goal", goals.GetHydrationGoals(a.fb)).Methods("GET")
 }

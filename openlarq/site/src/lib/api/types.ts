@@ -48,3 +48,7 @@ export interface GetHydrationGoalResponse {
 		volumeInLiter: number;
 	}[];
 }
+
+export interface GetUserInfoResponse {
+	displayName: string;
+}

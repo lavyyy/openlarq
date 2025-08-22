@@ -2,7 +2,8 @@ import type {
 	GetHydrationGoalProps,
 	GetHydrationGoalResponse,
 	GetLiquidIntakeProps,
-	GetLiquidIntakeResponse
+	GetLiquidIntakeResponse,
+	GetUserInfoResponse
 } from './types';
 import { makeApiRequest } from './utils';
 
@@ -32,6 +33,15 @@ export const getHydrationGoal = async (
 			index: props.index,
 			viewFrom: props.viewFrom
 		}
+	});
+
+	return response.data;
+};
+
+export const getUserInfo = async (): Promise<GetUserInfoResponse> => {
+	const response = await makeApiRequest<GetUserInfoResponse>({
+		route: '/user-info',
+		requestMethod: 'GET'
 	});
 
 	return response.data;

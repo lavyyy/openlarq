@@ -6,6 +6,8 @@ LARQ currently only provides a mobile app and no official API. OpenLARQ reverse-
 
 > This is an **unofficial project** and is not affiliated with LARQ.
 
+![openlarq-preview](https://cdn.barking.dev/openlarq-preview.png)
+
 ---
 
 ## Features
@@ -43,13 +45,14 @@ LARQ currently only provides a mobile app and no official API. OpenLARQ reverse-
 3. Run the API server:
 
    ```bash
+   cd openlarq
    make run dev
    ```
 
 4. Start the web dashboard:
 
    ```bash
-   cd site
+   cd openlarq/site
    pnpm install
    pnpm run dev
    ```

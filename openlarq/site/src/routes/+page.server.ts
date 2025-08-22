@@ -1,4 +1,4 @@
-import { getHydrationGoal, getLiquidIntake } from '$lib/api';
+import { getHydrationGoal, getLiquidIntake, getUserInfo } from '$lib/api';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -9,8 +9,11 @@ export const load: PageServerLoad = async () => {
 		viewFrom: 'right'
 	});
 
+	const userInfo = await getUserInfo();
+
 	return {
 		liquidIntake,
-		hydrationGoal
+		hydrationGoal,
+		userInfo
 	};
 };
