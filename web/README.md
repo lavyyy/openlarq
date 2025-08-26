@@ -1,1 +1,1 @@
-# Larq Intake Tracker (Web)
+# OpenLARQ Web Dashboard
