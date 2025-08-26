@@ -42,3 +42,26 @@ docker-build:
 docker-run:
 	@echo "Running Docker container..."
 	docker run -p 8080:8080 $(BINARY_NAME)
+
+# Docker Compose commands
+docker-up:
+	@echo "Starting all services with Docker Compose..."
+	docker-compose up -d
+
+docker-down:
+	@echo "Stopping all services..."
+	docker-compose down
+
+docker-logs:
+	@echo "Showing logs for all services..."
+	docker-compose logs -f
+
+docker-rebuild:
+	@echo "Rebuilding and starting all services..."
+	docker-compose up --build -d
+
+docker-clean:
+	@echo "Stopping services and removing containers..."
+	docker-compose down
+	@echo "Removing unused Docker resources..."
+	docker system prune -f

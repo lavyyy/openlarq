@@ -24,9 +24,72 @@ LARQ currently only provides a mobile app and no official API. OpenLARQ reverse-
 - Node.js `22`
 - Docker (optional)
 
+## Quick Start (Docker)
+
+The easiest way to get started is using Docker Compose, which will set up both the API backend and web frontend automatically.
+
+### Prerequisites
+
+- Docker installed on your system
+- LARQ account credentials
+
+### Setup with Docker Compose
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/lavyyy/openlarq.git
+   cd openlarq
+   ```
+
+2. Configure the environment credentials in the `.docker-compose.yml`:
+
+   ```env
+   LARQ_USERNAME=your_username
+   LARQ_PASSWORD=your_password
+   ```
+
+3. Start all services:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+4. Access your services:
+
+   - **Web Dashboard**: http://localhost:3000
+   - **API Backend**: http://localhost:8080
+
+5. To stop all services:
+   ```bash
+   docker-compose down
+   ```
+
+### Docker Compose Services
+
+- **`api`**: Go backend API server (port 8080)
+- **`web`**: Svelte frontend dashboard (port 3000)
+- **`db`**: Optional PostgreSQL database (commented out by default)
+
+### Development with Docker Compose
+
+For development, you can use the volume mounts to enable hot reloading:
+
+```bash
+# Start in development mode with live reloading
+docker-compose up
+
+# View logs
+docker-compose logs -f
+
+# Rebuild and restart a specific service
+docker-compose up --build api
+docker-compose up --build web
+```
+
 ---
 
-## Setup
+## Setup (Manual)
 
 1. Clone the repository:
 
