@@ -15,3 +15,9 @@ func (fc *FirebaseClient) GetUserHydrationGoals(params QueryParams) (QueryBody, 
 
 	return fc.Query(goalsPath, params)
 }
+
+func (fc *FirebaseClient) GetDeviceInfo(params QueryParams, deviceId string) (QueryBody, error) {
+	deviceInfoPath := fmt.Sprintf("/capUserSettings/%s/%s", fc.UserId(), deviceId)
+
+	return fc.Query(deviceInfoPath, params)
+}

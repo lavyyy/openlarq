@@ -45,14 +45,13 @@ LARQ currently only provides a mobile app and no official API. OpenLARQ reverse-
 3. Run the API server:
 
    ```bash
-   cd openlarq
    make run dev
    ```
 
 4. Start the web dashboard:
 
    ```bash
-   cd openlarq/site
+   cd site
    pnpm install
    pnpm run dev
    ```

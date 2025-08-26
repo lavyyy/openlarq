@@ -1,4 +1,4 @@
-package goals
+package handlers
 
 import (
 	"encoding/json"

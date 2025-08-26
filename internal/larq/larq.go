@@ -7,10 +7,7 @@ import (
 
 	"barking.dev/openlarq/internal/auth"
 	"barking.dev/openlarq/internal/firebase"
-	"barking.dev/openlarq/internal/goals"
-	"barking.dev/openlarq/internal/health"
-	"barking.dev/openlarq/internal/intake"
-	"barking.dev/openlarq/internal/user"
+	"barking.dev/openlarq/internal/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -41,10 +38,11 @@ func (a *App) StartApp() error {
 }
 
 func (a *App) registerApiRoutes(r *mux.Router) {
-	r.HandleFunc("/health", health.Health).Methods("GET")
-	r.HandleFunc("/user-info", user.GetUserInfo(a.fb)).Methods("GET")
-	r.HandleFunc("/liquid-intake", intake.GetLiquidIntake(a.fb)).Methods("GET")
-	r.HandleFunc("/hydration-goal", goals.GetHydrationGoals(a.fb)).Methods("GET")
+	r.HandleFunc("/health", handlers.Health).Methods("GET")
+	r.HandleFunc("/user-info", handlers.GetUserInfo(a.fb)).Methods("GET")
+	r.HandleFunc("/liquid-intake", handlers.GetLiquidIntake(a.fb)).Methods("GET")
+	r.HandleFunc("/hydration-goal", handlers.GetHydrationGoals(a.fb)).Methods("GET")
+	r.HandleFunc("/device-info", handlers.GetDeviceInfo(a.fb)).Methods("GET")
 }
 
 func (a *App) startServer(r *mux.Router) {
