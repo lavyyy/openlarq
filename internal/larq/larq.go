@@ -9,7 +9,6 @@ import (
 	"barking.dev/openlarq/internal/firebase"
 	"barking.dev/openlarq/internal/handlers"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 type App struct {
@@ -17,11 +16,6 @@ type App struct {
 }
 
 func NewApp() *App {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("err loading: %v", err)
-	}
-
 	app := &App{}
 
 	return app
