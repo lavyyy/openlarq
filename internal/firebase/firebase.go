@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"barking.dev/openlarq/internal/auth"
 	"github.com/gorilla/websocket"
 )
 
@@ -284,6 +285,14 @@ func (c *FirebaseClient) reconnect() error {
 	if c.conn != nil {
 		c.conn.Close()
 	}
+
+	// get and set new token
+	idToken, err := auth.Authenticate()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.idToken = idToken
 
 	// attempt to establish new connection
 	u := url.URL{
