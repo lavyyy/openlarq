@@ -4,15 +4,18 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"barking.dev/openlarq/internal/auth"
+	"barking.dev/openlarq/internal/cache"
 	"barking.dev/openlarq/internal/firebase"
 	"barking.dev/openlarq/internal/handlers"
 	"github.com/gorilla/mux"
 )
 
 type App struct {
-	fb *firebase.FirebaseClient
+	fb    *firebase.FirebaseClient
+	cache *cache.Cache
 }
 
 func NewApp() *App {
@@ -33,10 +36,10 @@ func (a *App) StartApp() error {
 
 func (a *App) registerApiRoutes(r *mux.Router) {
 	r.HandleFunc("/health", handlers.Health).Methods("GET")
-	r.HandleFunc("/user-info", handlers.GetUserInfo(a.fb)).Methods("GET")
-	r.HandleFunc("/liquid-intake", handlers.GetLiquidIntake(a.fb)).Methods("GET")
-	r.HandleFunc("/hydration-goal", handlers.GetHydrationGoals(a.fb)).Methods("GET")
-	r.HandleFunc("/device-info", handlers.GetDeviceInfo(a.fb)).Methods("GET")
+	r.HandleFunc("/user-info", handlers.GetUserInfo(a.fb, a.cache)).Methods("GET")
+	r.HandleFunc("/liquid-intake", handlers.GetLiquidIntake(a.fb, a.cache)).Methods("GET")
+	r.HandleFunc("/hydration-goal", handlers.GetHydrationGoals(a.fb, a.cache)).Methods("GET")
+	r.HandleFunc("/device-info", handlers.GetDeviceInfo(a.fb, a.cache)).Methods("GET")
 }
 
 func (a *App) startServer(r *mux.Router) {
@@ -71,5 +74,15 @@ func (a *App) authenticate() error {
 		log.Fatal("Failed to authenticate user:", err)
 	}
 
+	// create shared cache instance
+	a.cache = cache.New(5 * time.Minute)
+
 	return nil
+}
+
+func (a *App) InvalidateCache() {
+	if a.cache != nil {
+		a.cache.Clear()
+		log.Println("Cache invalidated")
+	}
 }
