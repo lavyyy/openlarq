@@ -65,7 +65,11 @@ func (c *FirebaseClient) Query(path string, queryParams QueryParams) (QueryBody,
 	c.messageMutex.Unlock()
 
 	// send the query
-	if err := c.conn.WriteJSON(msg); err != nil {
+	c.writeMutex.Lock()
+	err := c.conn.WriteJSON(msg)
+	c.writeMutex.Unlock()
+
+	if err != nil {
 		c.messageMutex.Lock()
 		delete(c.pending, msg.Data.RequestId)
 		c.messageMutex.Unlock()

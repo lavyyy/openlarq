@@ -2,14 +2,26 @@ import { getHydrationGoal, getLiquidIntake, getUserInfo } from '$lib/api';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-	const liquidIntake = await getLiquidIntake({});
+	// calculate date range
+	const today = new Date();
+	const oneYearAgo = new Date();
+	oneYearAgo.setFullYear(today.getFullYear() - 1);
 
-	const hydrationGoal = await getHydrationGoal({
-		index: 'time',
-		viewFrom: 'right'
-	});
+	// format dates
+	const endTime = today.toISOString().split('T')[0];
+	const startTime = oneYearAgo.toISOString().split('T')[0];
 
-	const userInfo = await getUserInfo();
+	const [liquidIntake, hydrationGoal, userInfo] = await Promise.all([
+		getLiquidIntake({
+			startTime,
+			endTime
+		}),
+		getHydrationGoal({
+			index: 'time',
+			viewFrom: 'right'
+		}),
+		getUserInfo()
+	]);
 
 	return {
 		liquidIntake,

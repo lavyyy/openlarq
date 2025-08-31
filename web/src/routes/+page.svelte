@@ -14,57 +14,78 @@
 
 	const intakeEntries = liquidIntake.entries;
 
-	// calculate total intake for today
+	let todayIntake = $state(0);
+	let currentGoal = $state(2000);
+	let percentage = $state(0);
+	let currentStreak = $state(0);
+	let personalBest = $state(0);
+
+	$effect(() => {
+		if (intakeEntries.length > 0) {
+			// calculate total intake for today
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+
+			todayIntake = intakeEntries
+				.filter((entry) => {
+					const entryDate = new Date(entry.time);
+					const startOfDay = new Date(today);
+					startOfDay.setHours(0, 0, 0, 0);
+					const endOfDay = new Date(today);
+					endOfDay.setHours(23, 59, 59, 999);
+					return entryDate >= startOfDay && entryDate <= endOfDay;
+				})
+				.reduce((sum, entry) => sum + entry.volumeInLiter * 1000, 0);
+
+			// latest hydration goal
+			currentGoal =
+				hydrationGoal.entries[hydrationGoal.entries.length - 1]?.volumeInLiter * 1000 || 2000;
+
+			// calculate percentage
+			percentage = Math.min(Math.round((todayIntake / currentGoal) * 100), 100);
+
+			// calculate streaks
+			const { currentStreak: streak, personalBest: best } = calculateStreaks();
+			currentStreak = streak;
+			personalBest = best;
+		}
+	});
+
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
 
-	const todayIntake = intakeEntries
-		.filter((entry) => {
-			const entryDate = new Date(entry.time);
-			const startOfDay = new Date(today);
-			startOfDay.setHours(0, 0, 0, 0);
-			const endOfDay = new Date(today);
-			endOfDay.setHours(23, 59, 59, 999);
-			return entryDate >= startOfDay && entryDate <= endOfDay;
-		})
-		.reduce((sum, entry) => sum + entry.volumeInLiter * 1000, 0); // convert to ml
-
-	// latest hydration goal
-	const currentGoal =
-		hydrationGoal.entries[hydrationGoal.entries.length - 1]?.volumeInLiter * 1000 || 2000; // default to 2000ml if no goal set
-
-	// calculate percentage
-	const percentage = Math.min(Math.round((todayIntake / currentGoal) * 100), 100);
-
-	// calculate streaks
 	const calculateStreaks = () => {
+		if (intakeEntries.length === 0) {
+			return { currentStreak: 0, personalBest: 0 };
+		}
+
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		// Only look at last 30 days for performance
+		const thirtyDaysAgo = new Date(today);
+		thirtyDaysAgo.setDate(today.getDate() - 30);
+
 		const entriesByDate = new Map<string, number>();
 
-		// Group entries by date and sum their volumes
+		// Group entries by date and sum their volumes (only recent entries)
 		intakeEntries.forEach((entry) => {
-			const date = new Date(entry.time).toDateString();
-			const volume = entry.volumeInLiter * 1000; // Convert to ml
-			entriesByDate.set(date, (entriesByDate.get(date) || 0) + volume);
+			const entryDate = new Date(entry.time);
+			if (entryDate >= thirtyDaysAgo) {
+				const date = entryDate.toDateString();
+				const volume = entry.volumeInLiter * 1000;
+				entriesByDate.set(date, (entriesByDate.get(date) || 0) + volume);
+			}
 		});
 
 		let currentStreak = 0;
 		let personalBest = 0;
 		let tempStreak = 0;
 
-		const oldestEntryDate = Array.from(entriesByDate.keys())[0];
+		// start from 30 days ago and work forward
+		let currentDatePtr = new Date(thirtyDaysAgo);
 
-		// check if we have any entries
-		if (intakeEntries.length === 0) {
-			return { currentStreak: 0, personalBest: 0 };
-		}
-
-		// oldest date in entry at midnight
-		// this holds the current date we're evaluating in the loop
-		let currentDatePtr = new Date(oldestEntryDate);
-		currentDatePtr.setHours(0, 0, 0, 0);
-
-		// loop through every day from the oldest entry to the current date
-		while (currentDatePtr.getTime() < today.getTime()) {
+		while (currentDatePtr.getTime() <= today.getTime()) {
 			const dateStr = currentDatePtr.toDateString();
 			const dayIntake = entriesByDate.get(dateStr) || 0;
 
@@ -75,6 +96,7 @@
 				}
 				personalBest = Math.max(personalBest, tempStreak);
 			} else {
+				tempStreak = 0;
 				if (currentDatePtr.getTime() === today.getTime()) {
 					currentStreak = 0;
 				}
@@ -85,8 +107,6 @@
 
 		return { currentStreak, personalBest };
 	};
-
-	const { currentStreak, personalBest } = calculateStreaks();
 </script>
 
 <div class="min-h-screen bg-gray-50 transition-colors dark:!bg-gray-900">

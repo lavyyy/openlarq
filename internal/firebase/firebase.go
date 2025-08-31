@@ -23,6 +23,7 @@ type FirebaseClient struct {
 	pending       map[int]chan QueryBody
 	streamBuffer  []QueryData
 	messageMutex  sync.Mutex
+	writeMutex    sync.Mutex
 	userId        string
 	autoReconnect bool
 	stopChan      chan struct{}
@@ -136,7 +137,12 @@ func (c *FirebaseClient) sendRequest(action string, requestData QueryBody) (Quer
 
 	data, _ := json.Marshal(msg)
 
-	if err := c.conn.WriteMessage(websocket.TextMessage, data); err != nil {
+	// prevent concurrent writes
+	c.writeMutex.Lock()
+	err := c.conn.WriteMessage(websocket.TextMessage, data)
+	c.writeMutex.Unlock()
+
+	if err != nil {
 		log.Printf("Failed to write message to WebSocket: %v", err)
 		c.messageMutex.Lock()
 		delete(c.pending, requestID)
@@ -170,6 +176,8 @@ func (c *FirebaseClient) processMessage(text string) {
 func (c *FirebaseClient) Listen() {
 	var chunkCount int
 	var buffer []string
+	var reconnectAttempts int
+	maxReconnectAttempts := 5
 
 	for {
 		select {
@@ -181,19 +189,32 @@ func (c *FirebaseClient) Listen() {
 				log.Printf("WebSocket read error: %v", err)
 
 				// Attempt to reconnect if enabled
-				if c.autoReconnect {
-					log.Println("Attempting to reconnect...")
+				if c.autoReconnect && reconnectAttempts < maxReconnectAttempts {
+					reconnectAttempts++
+					log.Printf("Attempting to reconnect... (attempt %d/%d)", reconnectAttempts, maxReconnectAttempts)
+
+					// exponential backoff: wait longer between attempts
+					waitTime := time.Duration(reconnectAttempts) * 5 * time.Second
+					time.Sleep(waitTime)
+
 					if err := c.reconnect(); err != nil {
 						log.Printf("Reconnection failed: %v", err)
-						time.Sleep(5 * time.Second) // Wait before next attempt
 						continue
 					}
-					log.Println("Successfully reconnected")
+
+					log.Printf("Successfully reconnected")
+					reconnectAttempts = 0
 					continue
+				} else if reconnectAttempts >= maxReconnectAttempts {
+					log.Printf("Max reconnection attempts reached, stopping")
+					return
 				}
 
 				return
 			}
+
+			// reset reconnect attempts on successful message
+			reconnectAttempts = 0
 
 			text := string(msg)
 
@@ -283,13 +304,22 @@ func (c *FirebaseClient) handleMessage(data map[string]interface{}) {
 func (c *FirebaseClient) reconnect() error {
 	// close existing connection if it exists
 	if c.conn != nil {
+		c.writeMutex.Lock()
 		c.conn.Close()
+		c.writeMutex.Unlock()
 	}
+
+	// clear any pending requests that might be stuck
+	c.messageMutex.Lock()
+	for reqID := range c.pending {
+		delete(c.pending, reqID)
+	}
+	c.messageMutex.Unlock()
 
 	// get and set new token
 	idToken, err := auth.Authenticate()
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to get new token: %v", err)
 	}
 
 	c.idToken = idToken
@@ -325,12 +355,19 @@ func (c *FirebaseClient) reconnect() error {
 		}
 	}
 
+	log.Printf("Successfully reconnected and re-authenticated")
 	return nil
 }
 
 func (c *FirebaseClient) handleRequestResponse(reqID int, data QueryData) {
 	c.messageMutex.Lock()
 	defer c.messageMutex.Unlock()
+
+	// check if we've already handled this request ID
+	if _, exists := c.pending[reqID]; !exists {
+		log.Printf("Request %d already handled or expired", reqID)
+		return
+	}
 
 	// handle completion or standalone response
 	if data.Body.Status != nil && *data.Body.Status == "ok" {
