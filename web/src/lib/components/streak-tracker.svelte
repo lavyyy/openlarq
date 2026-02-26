@@ -8,7 +8,7 @@
 </script>
 
 <div
-	class="rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+	class="flex h-full min-h-[100px] flex-col justify-center rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
 >
 	<div class="mb-2 flex items-center">
 		<div class={`${iconColor} mr-3 flex h-10 w-10 items-center justify-center rounded-full`}>
