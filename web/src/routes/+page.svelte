@@ -14,37 +14,39 @@
 
 	const intakeEntries = liquidIntake.entries;
 
-	let todayIntake = $state(0);
-	let currentGoal = $state(2000);
-	let percentage = $state(0);
+	const todayForFilter = new Date();
+	todayForFilter.setHours(0, 0, 0, 0);
+
+	const todayIntake = $derived(
+		intakeEntries.length === 0
+			? 0
+			: intakeEntries
+					.filter((entry) => {
+						const entryDate = new Date(entry.time);
+						const startOfDay = new Date(todayForFilter);
+						startOfDay.setHours(0, 0, 0, 0);
+						const endOfDay = new Date(todayForFilter);
+						endOfDay.setHours(23, 59, 59, 999);
+						return entryDate >= startOfDay && entryDate <= endOfDay;
+					})
+					.reduce((sum, entry) => sum + entry.volumeInLiter * 1000, 0)
+	);
+
+	const currentGoal = $derived(
+		hydrationGoal.entries[hydrationGoal.entries.length - 1]?.volumeInLiter * 1000 || 2000
+	);
+
+	const percentage = $derived(
+		intakeEntries.length === 0
+			? 0
+			: Math.min(Math.round((todayIntake / currentGoal) * 100), 100)
+	);
+
 	let currentStreak = $state(0);
 	let personalBest = $state(0);
 
 	$effect(() => {
 		if (intakeEntries.length > 0) {
-			// calculate total intake for today
-			const today = new Date();
-			today.setHours(0, 0, 0, 0);
-
-			todayIntake = intakeEntries
-				.filter((entry) => {
-					const entryDate = new Date(entry.time);
-					const startOfDay = new Date(today);
-					startOfDay.setHours(0, 0, 0, 0);
-					const endOfDay = new Date(today);
-					endOfDay.setHours(23, 59, 59, 999);
-					return entryDate >= startOfDay && entryDate <= endOfDay;
-				})
-				.reduce((sum, entry) => sum + entry.volumeInLiter * 1000, 0);
-
-			// latest hydration goal
-			currentGoal =
-				hydrationGoal.entries[hydrationGoal.entries.length - 1]?.volumeInLiter * 1000 || 2000;
-
-			// calculate percentage
-			percentage = Math.min(Math.round((todayIntake / currentGoal) * 100), 100);
-
-			// calculate streaks
 			const { currentStreak: streak, personalBest: best } = calculateStreaks();
 			currentStreak = streak;
 			personalBest = best;
