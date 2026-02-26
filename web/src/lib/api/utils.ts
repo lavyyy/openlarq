@@ -1,10 +1,11 @@
-import { API_URL } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import axios from 'axios';
 import type { MakeApiRequestProps, MakeApiRequestResponse } from './types';
 
 export const makeApiRequest = async <T>(
 	props: MakeApiRequestProps
 ): Promise<MakeApiRequestResponse<T>> => {
+	const API_URL = env.API_URL ?? '';
 	const method = props.requestMethod;
 	const route = props.route;
 	const headers = props.headers;

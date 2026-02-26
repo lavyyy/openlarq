@@ -45,6 +45,7 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:8080
+      - API_URL=http://api:8080
     networks:
       - openlarq-network
     depends_on:

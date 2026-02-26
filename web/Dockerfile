@@ -19,5 +19,5 @@ COPY . .
 # Expose port
 EXPOSE 3000
 
-# Start development server
-CMD ["pnpm", "dev", "--host", "0.0.0.0"]
+# Start development server (port 3000 set in vite.config.ts for docker-compose mapping)
+CMD ["pnpm", "dev"]
