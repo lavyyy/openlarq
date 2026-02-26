@@ -10,7 +10,10 @@
 		};
 	});
 
-	const sortedDates = entriesByDate.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+	const sortedEntries = [...entriesByDate].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+	const uniqueDates = [...new Map(sortedEntries.map((e) => [e.timestamp.toDateString(), e.timestamp])).values()].sort(
+		(a, b) => b.getTime() - a.getTime()
+	);
 </script>
 
 <div class="bg-card text-card-foreground rounded-lg border shadow-sm dark:border-gray-700">
@@ -24,13 +27,15 @@
 
 	<div class="max-h-60 overflow-y-auto p-6 pt-0">
 		{#if Object.entries(entriesByDate).length > 0}
-			{#each sortedDates as date}
+			{#each uniqueDates as date}
 				<div class="mb-4">
 					<h3 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-						{date.timestamp.toDateString()}
+						{date.toDateString()}
 					</h3>
 					<div class="space-y-2">
-						{#each entriesByDate as entry}
+						{#each entriesByDate
+								.filter((e) => e.timestamp.toDateString() === date.toDateString())
+								.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()) as entry}
 							<div
 								class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-2 dark:border-gray-600 dark:bg-gray-700"
 							>
