@@ -87,6 +87,18 @@ docker-compose up --build api
 docker-compose up --build web
 ```
 
+**Hot reload behavior:**
+
+- **Web (Svelte)**: The `web` service runs `pnpm dev` and mounts `./web` into the container, so edits to frontend code are picked up automatically; the Vite dev server reloads the browser.
+- **API (Go)**: The API container runs a compiled binary, so it does **not** hot-reload. After changing Go code, rebuild and restart the API:
+  ```bash
+  docker-compose up --build -d api
+  ```
+  For local Go development with hot reload (without Docker), use [Air](https://github.com/cosmtrek/air):
+  ```bash
+  make dev
+  ```
+
 ---
 
 ## Setup (Manual)
