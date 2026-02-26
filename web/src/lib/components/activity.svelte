@@ -5,7 +5,7 @@
 	const entriesByDate = entries.map((e) => {
 		return {
 			id: e.id,
-			amount: e.amount * 33.814,
+			amount: e.amount * 1000,
 			timestamp: e.timestamp
 		};
 	});
@@ -50,7 +50,7 @@
 											>
 												<span class="text-water-dark text-xs dark:text-blue-400">💧</span>
 											</div>
-											<span class="dark:text-gray-200">{entry.amount.toFixed(2)} oz</span>
+											<span class="dark:text-gray-200">{entry.amount.toFixed(0)} ml</span>
 										</div>
 										<span class="text-xs text-gray-400 dark:text-gray-500">
 											{format(entry.timestamp, 'h:mm a')}
