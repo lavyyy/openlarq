@@ -127,7 +127,7 @@
 			<div class="space-y-8 lg:col-span-4">
 				<ProgressCard {percentage} currentIntake={todayIntake} goal={currentGoal} />
 
-				<div class="grid grid-cols-2 gap-4">
+				<div class="grid grid-cols-2 gap-4 items-start">
 					<StreakTracker
 						title="CURRENT STREAK"
 						days={currentStreak}
@@ -135,7 +135,7 @@
 						iconName="flame"
 					/>
 					<StreakTracker
-						title="PERSONAL BEST"
+						title={'PERSONAL\nBEST'}
 						days={personalBest}
 						iconColor="bg-amber-500"
 						iconName="trophy"
