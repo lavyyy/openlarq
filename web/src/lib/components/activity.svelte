@@ -25,7 +25,7 @@
 		</div>
 	</div>
 
-	<div class="max-h-60 overflow-y-auto p-6 pt-0">
+	<div class="p-6 pt-0">
 		{#if Object.entries(entriesByDate).length > 0}
 			{#each uniqueDates as date}
 				<div class="mb-4">
