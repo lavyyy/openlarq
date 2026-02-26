@@ -4,14 +4,17 @@
 	const { entries }: { entries: { id: string; amount: number; timestamp: Date }[] } = $props();
 
 	let data = $state<{ [key: string]: number }>({});
-	let year = $state<number>(2025);
+	const currentYear = new Date().getFullYear();
+	let year = $state<number>(currentYear);
 	let years: number[] = $state<number[]>([]);
 
-	// update years when entries change
+	// update years when entries change; always include current year
 	$effect(() => {
-		years = Array.from(new Set(entries.map((e) => new Date(e.timestamp).getFullYear()))).sort(
-			(a, b) => b - a
+		const fromEntries = Array.from(
+			new Set(entries.map((e) => new Date(e.timestamp).getFullYear()))
 		);
+		const withCurrent = fromEntries.includes(currentYear) ? fromEntries : [currentYear, ...fromEntries];
+		years = withCurrent.sort((a, b) => b - a);
 	});
 
 	function fillMap() {
