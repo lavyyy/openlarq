@@ -64,28 +64,26 @@
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 
-		// Only look at last 30 days for performance
-		const thirtyDaysAgo = new Date(today);
-		thirtyDaysAgo.setDate(today.getDate() - 30);
-
+		// Use full intake history so personal best counts streaks outside the last 30 days
 		const entriesByDate = new Map<string, number>();
-
-		// Group entries by date and sum their volumes (only recent entries)
 		intakeEntries.forEach((entry) => {
 			const entryDate = new Date(entry.time);
-			if (entryDate >= thirtyDaysAgo) {
-				const date = entryDate.toDateString();
-				const volume = entry.volumeInLiter * 1000;
-				entriesByDate.set(date, (entriesByDate.get(date) || 0) + volume);
-			}
+			const date = entryDate.toDateString();
+			const volume = entry.volumeInLiter * 1000;
+			entriesByDate.set(date, (entriesByDate.get(date) || 0) + volume);
 		});
+
+		const dateStrs = Array.from(entriesByDate.keys());
+		const rangeStart = dateStrs.length
+			? new Date(Math.min(...dateStrs.map((s) => new Date(s).getTime())))
+			: new Date(today);
+		rangeStart.setHours(0, 0, 0, 0);
 
 		let currentStreak = 0;
 		let personalBest = 0;
 		let tempStreak = 0;
 
-		// start from 30 days ago and work forward
-		let currentDatePtr = new Date(thirtyDaysAgo);
+		let currentDatePtr = new Date(rangeStart);
 
 		while (currentDatePtr.getTime() <= today.getTime()) {
 			const dateStr = currentDatePtr.toDateString();
