@@ -115,7 +115,7 @@
 			<div class="flex items-center space-x-4">
 				<h1 class="text-3xl font-bold text-gray-900 dark:text-white">
 					<span class="text-blue-600 dark:text-blue-400">OpenLARQ</span> - {userInfo.displayName}'s
-					hydration stats
+					Hydration Stats
 				</h1>
 			</div>
 			<div class="flex">
