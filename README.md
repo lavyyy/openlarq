@@ -42,10 +42,16 @@ The easiest way to get started is using Docker Compose, which will set up both t
    cd openlarq
    ```
 
-2. Configure the environment credentials in the `.docker-compose.yml`:
+2. Copy `.env.example` to `.env` and set your LARQ credentials:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Edit `.env`:
 
    ```env
-   LARQ_USERNAME=your_username
+   LARQ_EMAIL=your_larq_email
    LARQ_PASSWORD=your_password
    ```
 
@@ -87,6 +93,18 @@ docker-compose up --build api
 docker-compose up --build web
 ```
 
+**Hot reload behavior:**
+
+- **Web (Svelte)**: The `web` service runs `pnpm dev` and mounts `./web` into the container, so edits to frontend code are picked up automatically; the Vite dev server reloads the browser.
+- **API (Go)**: The API container runs a compiled binary, so it does **not** hot-reload. After changing Go code, rebuild and restart the API:
+  ```bash
+  docker-compose up --build -d api
+  ```
+  For local Go development with hot reload (without Docker), use [Air](https://github.com/cosmtrek/air):
+  ```bash
+  make dev
+  ```
+
 ---
 
 ## Setup (Manual)
@@ -98,10 +116,10 @@ docker-compose up --build web
    cd openlarq
    ```
 
-2. Configure your LARQ credentials:
+2. Configure your LARQ credentials (e.g. in a `.env` file or export in your shell):
 
    ```env
-   LARQ_USERNAME=your_username
+   LARQ_EMAIL=your_larq_email
    LARQ_PASSWORD=your_password
    ```
 
@@ -114,7 +132,7 @@ docker-compose up --build web
 4. Start the web dashboard:
 
    ```bash
-   cd site
+   cd web
    pnpm install
    pnpm run dev
    ```
@@ -130,7 +148,7 @@ docker-compose up --build web
 
 | Variable        | Description                      | Required |
 | --------------- | -------------------------------- | -------- |
-| `LARQ_USERNAME` | Your LARQ account email/username | ✅       |
+| `LARQ_EMAIL`    | Your LARQ account email          | ✅       |
 | `LARQ_PASSWORD` | Your LARQ account password       | ✅       |
 | `PORT`          | API server port (default: 8080)  | ❌       |
 

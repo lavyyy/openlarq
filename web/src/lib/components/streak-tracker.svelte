@@ -8,10 +8,10 @@
 </script>
 
 <div
-	class="rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+	class="flex min-h-[100px] flex-col rounded-xl bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
 >
-	<div class="mb-2 flex items-center">
-		<div class={`${iconColor} mr-3 flex h-10 w-10 items-center justify-center rounded-full`}>
+	<div class="flex items-center">
+		<div class={`${iconColor} mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-full`}>
 			{#if iconName === 'flame'}
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
 					<path
@@ -30,8 +30,8 @@
 				</svg>
 			{/if}
 		</div>
-		<div>
-			<div class="text-xs text-gray-500 dark:text-gray-400">{title}</div>
+		<div class="min-w-0 flex-1">
+			<div class="h-10 text-xs leading-tight text-gray-500 dark:text-gray-400">{@html title.replace(/\n/g, '<br>')}</div>
 			<div class="text-navy-blue text-xl font-bold dark:text-blue-400">
 				{days} day{days !== 1 ? 's' : ''}
 			</div>

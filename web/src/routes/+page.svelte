@@ -14,37 +14,39 @@
 
 	const intakeEntries = liquidIntake.entries;
 
-	let todayIntake = $state(0);
-	let currentGoal = $state(2000);
-	let percentage = $state(0);
+	const todayForFilter = new Date();
+	todayForFilter.setHours(0, 0, 0, 0);
+
+	const todayIntake = $derived(
+		intakeEntries.length === 0
+			? 0
+			: intakeEntries
+					.filter((entry) => {
+						const entryDate = new Date(entry.time);
+						const startOfDay = new Date(todayForFilter);
+						startOfDay.setHours(0, 0, 0, 0);
+						const endOfDay = new Date(todayForFilter);
+						endOfDay.setHours(23, 59, 59, 999);
+						return entryDate >= startOfDay && entryDate <= endOfDay;
+					})
+					.reduce((sum, entry) => sum + entry.volumeInLiter * 1000, 0)
+	);
+
+	const currentGoal = $derived(
+		hydrationGoal.entries[hydrationGoal.entries.length - 1]?.volumeInLiter * 1000 || 2000
+	);
+
+	const percentage = $derived(
+		intakeEntries.length === 0
+			? 0
+			: Math.min(Math.round((todayIntake / currentGoal) * 100), 100)
+	);
+
 	let currentStreak = $state(0);
 	let personalBest = $state(0);
 
 	$effect(() => {
 		if (intakeEntries.length > 0) {
-			// calculate total intake for today
-			const today = new Date();
-			today.setHours(0, 0, 0, 0);
-
-			todayIntake = intakeEntries
-				.filter((entry) => {
-					const entryDate = new Date(entry.time);
-					const startOfDay = new Date(today);
-					startOfDay.setHours(0, 0, 0, 0);
-					const endOfDay = new Date(today);
-					endOfDay.setHours(23, 59, 59, 999);
-					return entryDate >= startOfDay && entryDate <= endOfDay;
-				})
-				.reduce((sum, entry) => sum + entry.volumeInLiter * 1000, 0);
-
-			// latest hydration goal
-			currentGoal =
-				hydrationGoal.entries[hydrationGoal.entries.length - 1]?.volumeInLiter * 1000 || 2000;
-
-			// calculate percentage
-			percentage = Math.min(Math.round((todayIntake / currentGoal) * 100), 100);
-
-			// calculate streaks
 			const { currentStreak: streak, personalBest: best } = calculateStreaks();
 			currentStreak = streak;
 			personalBest = best;
@@ -62,28 +64,26 @@
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 
-		// Only look at last 30 days for performance
-		const thirtyDaysAgo = new Date(today);
-		thirtyDaysAgo.setDate(today.getDate() - 30);
-
+		// Use full intake history so personal best counts streaks outside the last 30 days
 		const entriesByDate = new Map<string, number>();
-
-		// Group entries by date and sum their volumes (only recent entries)
 		intakeEntries.forEach((entry) => {
 			const entryDate = new Date(entry.time);
-			if (entryDate >= thirtyDaysAgo) {
-				const date = entryDate.toDateString();
-				const volume = entry.volumeInLiter * 1000;
-				entriesByDate.set(date, (entriesByDate.get(date) || 0) + volume);
-			}
+			const date = entryDate.toDateString();
+			const volume = entry.volumeInLiter * 1000;
+			entriesByDate.set(date, (entriesByDate.get(date) || 0) + volume);
 		});
+
+		const dateStrs = Array.from(entriesByDate.keys());
+		const rangeStart = dateStrs.length
+			? new Date(Math.min(...dateStrs.map((s) => new Date(s).getTime())))
+			: new Date(today);
+		rangeStart.setHours(0, 0, 0, 0);
 
 		let currentStreak = 0;
 		let personalBest = 0;
 		let tempStreak = 0;
 
-		// start from 30 days ago and work forward
-		let currentDatePtr = new Date(thirtyDaysAgo);
+		let currentDatePtr = new Date(rangeStart);
 
 		while (currentDatePtr.getTime() <= today.getTime()) {
 			const dateStr = currentDatePtr.toDateString();
@@ -115,7 +115,7 @@
 			<div class="flex items-center space-x-4">
 				<h1 class="text-3xl font-bold text-gray-900 dark:text-white">
 					<span class="text-blue-600 dark:text-blue-400">OpenLARQ</span> - {userInfo.displayName}'s
-					hydration stats
+					Hydration Stats
 				</h1>
 			</div>
 			<div class="flex">
@@ -127,7 +127,7 @@
 			<div class="space-y-8 lg:col-span-4">
 				<ProgressCard {percentage} currentIntake={todayIntake} goal={currentGoal} />
 
-				<div class="grid grid-cols-2 gap-4">
+				<div class="grid grid-cols-2 gap-4 items-start">
 					<StreakTracker
 						title="CURRENT STREAK"
 						days={currentStreak}
@@ -135,7 +135,7 @@
 						iconName="flame"
 					/>
 					<StreakTracker
-						title="PERSONAL BEST"
+						title={'PERSONAL\nBEST'}
 						days={personalBest}
 						iconColor="bg-amber-500"
 						iconName="trophy"

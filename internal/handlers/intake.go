@@ -32,8 +32,8 @@ func GetLiquidIntake(firebaseClient *firebase.FirebaseClient, cache *cache.Cache
 		endTime := query.Get("endTime")
 		index := query.Get("index")
 
-		// create cache key
-		cacheKey := fmt.Sprintf("intake:%s:%s:%s", startTime, endTime, index)
+		// create cache key (v2 = exclude deleted entries)
+		cacheKey := fmt.Sprintf("intake:v2:%s:%s:%s", startTime, endTime, index)
 
 		// try to get from cache first
 		if cachedData, hit := cache.Get(cacheKey); hit {
@@ -82,19 +82,37 @@ func fetchLiquidIntake(firebaseClient *firebase.FirebaseClient, startTime, endTi
 		Entries: make([]LiquidIntakeEntry, 0),
 	}
 
-	// extract and format data
-	entryCount := 0
-	for _, key := range slices.Sorted(maps.Keys(res.Data.(map[string]interface{}))) {
+	dataMap, _ := res.Data.(map[string]interface{})
+	keys := slices.Sorted(maps.Keys(dataMap))
 
-		v := res.Data.(map[string]interface{})
-		if entryMap, ok := v[key].(map[string]interface{}); ok {
-			entry := formatIntakeEntry(entryMap)
-			response.Entries = append(response.Entries, entry)
-			entryCount++
+	for _, key := range keys {
+		v := dataMap[key]
+		entryMap, ok := v.(map[string]interface{})
+		if !ok {
+			continue
 		}
+		if isEntryDeleted(entryMap) {
+			continue
+		}
+		entry := formatIntakeEntry(entryMap)
+		response.Entries = append(response.Entries, entry)
 	}
 
 	return response, nil
+}
+
+// isEntryDeleted returns true if the intake entry is soft-deleted (updateState "deleted", dateDeleted set, or isDeleted true).
+func isEntryDeleted(entryMap map[string]interface{}) bool {
+	if u, ok := entryMap["updateState"].(string); ok && u == "deleted" {
+		return true
+	}
+	if dateDeleted, ok := entryMap["dateDeleted"].(string); ok && dateDeleted != "" {
+		return true
+	}
+	if isDeleted, ok := entryMap["isDeleted"].(bool); ok && isDeleted {
+		return true
+	}
+	return false
 }
 
 func formatIntakeEntry(entryMap map[string]interface{}) LiquidIntakeEntry {
